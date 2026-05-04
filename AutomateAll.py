@@ -57,7 +57,7 @@ def main():
     choice = input("\nSelect Mode (1/2): ")
 
     scripts = ["SalesFileDownload.py", "SalesFileCleaning.py", "QueryGenerator.py", 
-               "SupersetBot.py", "MergeData.py", "CalculateMetrics.py"]
+               "SupersetBot.py", "MergeData.py", "CollateSalesData.py", "CalculateMetrics.py"]
 
     if choice == '2':
         # --- MANUAL MODE ---
