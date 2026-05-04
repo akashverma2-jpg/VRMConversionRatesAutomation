@@ -97,20 +97,48 @@ def run_metrics_workflow():
     bdm_to_email_map = map_bdm_to_email(df_unique[BDM_COL_NAME].dropna().unique(), list(TEAM_MAP.keys()))
     df_unique['Email'] = df_unique[BDM_COL_NAME].map(bdm_to_email_map)
 
-    df_email = df_unique.groupby('Email').agg(
+    # 1. Get Numerators from Unique DPs
+    df_num = df_unique.groupby('Email').agg(
         Act_Num=('DP Status', lambda x: (x == 'Inactive').sum()),
         Fav_Num=('DP Status', lambda x: x.isin(['Activated by LGLC', 'Already Active']).sum()),
         Con_Num=('DP Status', 'count')
     ).reset_index()
 
-    df_email['Act_Den'] = df_email['Email'].map(df_inactive_csv.groupby('agent_mapped')['sum_inactive_dps_creating_quotes'].sum()).fillna(0)
-    df_email['Fav_Den'] = df_email['Email'].map(df_fav_csv.groupby('agent_mapped')['dp_count'].sum()).fillna(0)
+    # 2. Get Denominators from CSVs
+    df_den_act = df_inactive_csv.groupby('agent_mapped')['sum_inactive_dps_creating_quotes'].sum().reset_index()
+    df_den_fav = df_fav_csv.groupby('agent_mapped')['dp_count'].sum().reset_index()
+
+    # 3. Merge them using an OUTER join to catch everyone
+    df_email = pd.merge(df_num, df_den_act, left_on='Email', right_on='agent_mapped', how='outer')
+    df_email = pd.merge(df_email, df_den_fav, left_on='Email', right_on='agent_mapped', how='outer')
+
+    # 4. Clean up columns and fill NaNs
+    df_email['Email'] = df_email['Email'].fillna(df_email['agent_mapped_x']).fillna(df_email['agent_mapped_y'])
+    df_email = df_email.drop(columns=['agent_mapped_x', 'agent_mapped_y'])
+    df_email = df_email.fillna(0)
+
+    # Rename for consistency
+    df_email.columns = ['Email', 'Act_Num', 'Fav_Num', 'Con_Num', 'Act_Den', 'Fav_Den']
     df_email['Con_Den'] = df_email['Act_Den'] + df_email['Fav_Den']
 
+    # Team Level Metrics
+    df_email['Team'] = df_email['Email'].map(TEAM_MAP).fillna('unknown')
+    df_team = df_email.groupby('Team').agg(
+        Act_Num=('Act_Num', 'sum'),
+        Fav_Num=('Fav_Num', 'sum'),
+        Con_Num=('Con_Num', 'sum'),
+        Act_Den=('Act_Den', 'sum'),
+        Fav_Den=('Fav_Den', 'sum'),
+        Con_Den=('Con_Den', 'sum')
+    ).reset_index()
+    df_team['Activation Rate'] = df_team.apply(lambda row: row['Act_Num'] / row['Act_Den'] if row['Act_Den'] > 0 else 0, axis=1)
+    df_team['Favourite Conv Rate'] = df_team.apply(lambda row: row['Fav_Num'] / row['Fav_Den'] if row['Fav_Den'] > 0 else 0, axis=1)
+    df_team['Consolidated Rate'] = df_team.apply(lambda row: row['Con_Num'] / row['Con_Den'] if row['Con_Den'] > 0 else 0, axis=1)
+
     # Final Overall Row
-    act_n, act_d = df_email['Act_Num'].sum(), df_email['Act_Den'].sum()
-    fav_n, fav_d = df_email['Fav_Num'].sum(), df_email['Fav_Den'].sum()
-    con_n, con_d = df_email['Con_Num'].sum(), df_email['Con_Den'].sum()
+    act_n, act_d = df_email['Act_Num'].sum(), df_inactive_csv['sum_inactive_dps_creating_quotes'].sum()
+    fav_n, fav_d = df_email['Fav_Num'].sum(), df_fav_csv['dp_count'].sum()
+    con_n, con_d = df_email['Con_Num'].sum(), act_d + fav_d
 
     new_trend_row = {
         'Date': data_date,
@@ -133,6 +161,7 @@ def run_metrics_workflow():
     output_file = f"Performance_Breakdown_{data_date}.xlsx"
     with pd.ExcelWriter(output_file) as writer:
         pd.DataFrame([new_trend_row]).to_excel(writer, sheet_name='Summary (Mode-{} )'.format(RUN_MODE), index=False)
+        df_team.to_excel(writer, sheet_name='Team Level', index=False)
         df_email.to_excel(writer, sheet_name='Email Level', index=False)
 
     print(f"✅ Metrics Created in {RUN_MODE} mode for {data_date}.")
