@@ -2,13 +2,10 @@ import pandas as pd
 import os
 from datetime import datetime
 
-# --- CONFIG ---
 DOWNLOAD_FOLDER = './downloads'
-# Environment variable passed by AutomateAll.py
-TARGET_MONTH = os.getenv("TARGET_MONTH") 
 
 def generate_athena_query():
-    # 1. Find the latest file (excluding temp files)
+    # 1. Find the latest file, EXCLUDING temporary Excel lock files (starting with ~$)
     files = [
         os.path.join(DOWNLOAD_FOLDER, f) 
         for f in os.listdir(DOWNLOAD_FOLDER) 
@@ -20,32 +17,24 @@ def generate_athena_query():
         return None
     
     latest_file = max(files, key=os.path.getctime)
-    print(f"🔍 Processing: {os.path.basename(latest_file)}")
+    print(f"Reading data from: {os.path.basename(latest_file)}")
 
     try:
-        # 2. READ DATA DATE (Crucial for Catch-up Logic)
-        # We read the 'Health' sheet to find the actual max date of the data
-        date_df = pd.read_excel(latest_file, sheet_name='Health', engine='openpyxl')
-        date_df['Date'] = pd.to_datetime(date_df['Date'])
-        file_max_date = date_df['Date'].max()
-        
-        # This becomes our filename and filter reference
-        data_date_str = file_max_date.strftime('%Y-%m-%d')
-        
-        # Calculate the 1st of the month for the data in the file
-        # (If catching up for April 30, this will be April 1)
-        first_date_of_data_month = file_max_date.replace(day=1).strftime('%Y-%m-%d')
+        # Using engine='openpyxl' to handle modern Mac Excel formats reliably
+        df = pd.read_excel(latest_file, sheet_name='Health Unique DPs', engine='openpyxl')
 
-        # 3. Extract IDs from 'Health Unique DPs'
-        unique_df = pd.read_excel(latest_file, sheet_name='Health Unique DPs', engine='openpyxl')
-        unique_ids = unique_df['DP ID'].dropna().astype(str).unique()
+        # 2. Extract DP IDs and format for SQL
+        unique_ids = df['DP ID'].dropna().astype(str).unique()
         sql_id_list = ",\n".join([f"'{id_val}'" for id_val in unique_ids])
 
-        # 4. Filename logic: Always match the date INSIDE the file
-        output_filename = f"query_{data_date_str}.sql"
+        # 3. Dynamic logic for the Query content (First day of current month)
+        first_date_month = datetime.today().replace(day=1).strftime('%Y-%m-%d')
+        
+        # 4. Dynamic filename: query_YYYY-MM-DD.sql
+        current_date_str = datetime.today().strftime('%Y-%m-%d')
+        output_filename = f"query_{current_date_str}.sql"
 
         # 5. Build the final SQL string
-        # We replace hardcoded 'current_month' logic with our dynamic first_date_of_data_month
         query = f"""
 WITH partner_ids AS (
     SELECT dpno, _id
@@ -85,7 +74,7 @@ client_status_flag AS (
         CASE
             WHEN first_sale_date < TIMESTAMP '2024-08-01' 
                 THEN 'Already Active'
-            WHEN first_sale_date < TIMESTAMP '{first_date_of_data_month}' 
+            WHEN first_sale_date < TIMESTAMP '{first_date_month}' 
                 THEN 'Activated by LGLC'
             ELSE 'Inactive'
         END AS client_status
@@ -109,19 +98,14 @@ ORDER BY
     pd.dpno,
     pd.salesdetail_intermediaryloginid;
 """
-        # 6. Save
+        # 6. Save with the new timestamped filename
         with open(output_filename, "w") as f:
             f.write(query)
             
         print("-" * 30)
-        if TARGET_MONTH:
-            print(f"🔄 MODE: CATCH-UP ({TARGET_MONTH})")
-        else:
-            print(f"🚀 MODE: REGULAR")
-            
-        print(f"📅 Data Date Identified: {data_date_str}")
-        print(f"📅 Status Threshold:    {first_date_of_data_month}")
-        print(f"💾 File Saved:          {output_filename}")
+        print(f"✅ Success!")
+        print(f"📅 Query Date: {first_date_month}")
+        print(f"💾 File Saved: {output_filename}")
         print("-" * 30)
         
         return query, output_filename
