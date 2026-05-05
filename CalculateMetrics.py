@@ -152,6 +152,7 @@ def run_metrics_workflow():
     # Update Trend Tracker
     if os.path.exists(TREND_TRACKER_FILE):
         df_trend = pd.read_excel(TREND_TRACKER_FILE)
+        df_trend['Date'] = pd.to_datetime(df_trend['Date']).dt.strftime('%Y-%m-%d')
         df_trend = pd.concat([df_trend[df_trend['Date'] != data_date], pd.DataFrame([new_trend_row])], ignore_index=True)
     else:
         df_trend = pd.DataFrame([new_trend_row])
