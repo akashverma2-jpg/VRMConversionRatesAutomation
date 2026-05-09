@@ -67,16 +67,24 @@ def collate_sales_data():
         # 3. Concatenate
         df_combined = pd.concat([df_master, df_daily_subset], ignore_index=True)
         
+        # Standardize formats to ensure correct deduplication across old and new data
+        df_combined['Date'] = pd.to_datetime(df_combined['Date']).dt.strftime('%Y-%m-%d')
+        df_combined['DP ID'] = df_combined['DP ID'].astype(str).str.replace(r'\.0$', '', regex=True).str.strip()
+        df_combined['Net Premium'] = pd.to_numeric(df_combined['Net Premium'], errors='coerce')
+        
         # 4. Deduplicate (The DP ID, Date, Net Premium logic)
         # Keep the 'last' entry so that updated DP statuses override older ones
         initial_count = len(df_combined)
         df_combined = df_combined.drop_duplicates(subset=['DP ID', 'Date', 'Net Premium'], keep='last')
         final_count = len(df_combined)
         
-        # 5. Add Serial Number
+        # 5. Sort by Date in descending order (latest first)
+        df_combined = df_combined.sort_values(by='Date', ascending=False)
+        
+        # 6. Add Serial Number
         df_combined.insert(0, 'Serial No.', range(1, len(df_combined) + 1))
         
-        # 6. Save back to Master File
+        # 7. Save back to Master File
         df_combined.to_excel(MASTER_FILE, index=False)
         
         print(f"✅ Master File Updated successfully!")

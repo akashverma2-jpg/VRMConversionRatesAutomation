@@ -75,9 +75,10 @@ def run_metrics_workflow():
 
     latest_excel = max(excel_files, key=os.path.getctime)
     
-    # Identify Target Date from 'Health' sheet
-    df_date = pd.read_excel(latest_excel, sheet_name='Health', engine='openpyxl')
-    data_date = pd.to_datetime(df_date['Date']).max().strftime('%Y-%m-%d')
+    # Identify Target Date and Load Sales Data from 'Health' sheet
+    df_health = pd.read_excel(latest_excel, sheet_name='Health', engine='openpyxl')
+    df_health.columns = df_health.columns.str.strip()
+    data_date = pd.to_datetime(df_health['Date']).max().strftime('%Y-%m-%d')
     
     print(f"\n📈 Calculating Metrics | Mode: {RUN_MODE} | Date: {data_date}")
 
@@ -140,11 +141,34 @@ def run_metrics_workflow():
     fav_n, fav_d = df_email['Fav_Num'].sum(), df_fav_csv['dp_count'].sum()
     con_n, con_d = df_email['Con_Num'].sum(), act_d + fav_d
 
+    # Calculate New Overall Metrics
+    df_health['Net Premium'] = pd.to_numeric(df_health['Net Premium'], errors='coerce').fillna(0)
+    
+    # Inactive Stats
+    df_inactive_sales = df_health[df_health['DP Status'].str.strip() == 'Inactive']
+    inactive_total_premium = df_inactive_sales['Net Premium'].sum()
+    inactive_total_nop = len(df_inactive_sales)
+    inactive_unique_dps = df_inactive_sales['DP ID'].nunique()
+    avg_premium_inactive = inactive_total_premium / inactive_total_nop if inactive_total_nop > 0 else 0
+    nop_per_dp_inactive = inactive_total_nop / inactive_unique_dps if inactive_unique_dps > 0 else 0
+    
+    # Favourite Stats
+    df_fav_sales = df_health[df_health['DP Status'].str.strip().isin(['Already Active', 'Activated by LGLC'])]
+    fav_total_premium = df_fav_sales['Net Premium'].sum()
+    fav_total_nop = len(df_fav_sales)
+    fav_unique_dps = df_fav_sales['DP ID'].nunique()
+    avg_premium_fav = fav_total_premium / fav_total_nop if fav_total_nop > 0 else 0
+    nop_per_dp_fav = fav_total_nop / fav_unique_dps if fav_unique_dps > 0 else 0
+
     new_trend_row = {
         'Date': data_date,
         'Act Numerator': act_n, 'Act Denominator': act_d, 'Activation Rate': act_n/act_d if act_d > 0 else 0,
         'Fav Numerator': fav_n, 'Fav Denominator': fav_d, 'Favourite Conv Rate': fav_n/fav_d if fav_d > 0 else 0,
         'Consolidated Numerator': con_n, 'Consolidated Denominator': con_d, 'Consolidated Rate': con_n/con_d if con_d > 0 else 0,
+        'Avg Premium Inactive': avg_premium_inactive,
+        'Avg Premium Fav': avg_premium_fav,
+        'NOP per DP Inactive': nop_per_dp_inactive,
+        'NOP per DP Fav': nop_per_dp_fav,
         'Run Mode': RUN_MODE,
         'Run Timestamp': datetime.now().strftime('%Y-%m-%d %H:%M')
     }
