@@ -6,6 +6,8 @@ from CalculateMetrics import TEAM_MAP, clean_string, map_bdm_to_email
 DOWNLOAD_FOLDER = './downloads'
 MASTER_FILE = 'Collated_Sales_Master.xlsx'
 
+## comment
+
 def collate_sales_data():
     all_files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) if not f.startswith('~$')]
     excel_files = [f for f in all_files if f.endswith(('.xlsx', '.xls'))]
