@@ -51,39 +51,63 @@ def main():
     print("="*40)
     print("   CONVERSION PIPELINE: MISSION CONTROL")
     print("="*40)
-    print("1. 🤖 Auto-Run (Trend Gap Check + Current)")
-    print("2. 🛠️  Manual Search (Specific Subject + Date)")
-    
-    choice = input("\nSelect Mode (1/2): ")
 
     scripts = ["SalesFileDownload.py", "SalesFileCleaning.py", "QueryGenerator.py", 
-               "SupersetBot.py", "MergeData.py", "CollateSalesData.py", "CalculateMetrics.py"]
+               "SupersetBot.py", "MergeData.py", "CollateSalesData.py", "CalculateMetrics.py", "CalculateWeeklyMetrics.py"]
 
-    if choice == '2':
-        # --- MANUAL MODE ---
-        sub = input("📧 Enter Subject Keyword: ").strip()
-        date_str = input("📅 Enter Date (DD-Mon-YYYY): ").strip()
+    print("Available Steps:")
+    for i, script in enumerate(scripts, 1):
+        print(f"{i}. {script}")
         
-        print(f"\n🎯 Targeted Run: {sub} from {date_str}")
-        for script in scripts:
-            run_step(script, manual_sub=sub, manual_date=date_str)
+    start_step = input(f"\nEnter step number to start from (1-{len(scripts)}) [Press Enter for 1]: ").strip()
+    try:
+        start_index = int(start_step) - 1 if start_step else 0
+        if not (0 <= start_index < len(scripts)):
+            print("⚠️ Invalid step number. Starting from step 1.")
+            start_index = 0
+    except ValueError:
+        print("⚠️ Invalid input. Starting from step 1.")
+        start_index = 0
 
+    scripts_to_run = scripts[start_index:]
+    print(f"\n🚀 Will execute from: {scripts_to_run[0]}")
+
+    if start_index == 0:
+        print("\n1. 🤖 Auto-Run (Trend Gap Check + Current)")
+        print("2. 🛠️  Manual Search (Specific Subject + Date)")
+        
+        choice = input("\nSelect Mode (1/2): ")
+
+        if choice == '2':
+            # --- MANUAL MODE ---
+            sub = input("📧 Enter Subject Keyword: ").strip()
+            date_str = input("📅 Enter Date (DD-Mon-YYYY): ").strip()
+            
+            print(f"\n🎯 Targeted Run: {sub} from {date_str}")
+            for script in scripts_to_run:
+                run_step(script, manual_sub=sub, manual_date=date_str)
+
+        else:
+            # --- AUTO-RUN MODE ---
+            # 1. Check for gaps in the previous month
+            missing_month, is_missing = check_month_completion()
+            
+            if is_missing:
+                print(f"\n🚨 GAP DETECTED: {missing_month} is incomplete in {TREND_FILE}.")
+                catch_up = input(f"❓ Run catch-up for {missing_month}? (y/n): ")
+                if catch_up.lower() == 'y':
+                    for script in scripts_to_run:
+                        run_step(script, target_month=missing_month)
+                    print(f"\n✅ Catch-up for {missing_month} complete.")
+
+            # 2. Run for current month
+            print("\n🌟 Starting regular current month automation...")
+            for script in scripts_to_run:
+                run_step(script)
     else:
-        # --- AUTO-RUN MODE ---
-        # 1. Check for gaps in the previous month
-        missing_month, is_missing = check_month_completion()
-        
-        if is_missing:
-            print(f"\n🚨 GAP DETECTED: {missing_month} is incomplete in {TREND_FILE}.")
-            catch_up = input(f"❓ Run catch-up for {missing_month}? (y/n): ")
-            if catch_up.lower() == 'y':
-                for script in scripts:
-                    run_step(script, target_month=missing_month)
-                print(f"\n✅ Catch-up for {missing_month} complete.")
-
-        # 2. Run for current month
-        print("\n🌟 Starting regular current month automation...")
-        for script in scripts:
+        # Resuming from a later step (skip the mode prompt)
+        print(f"\n🌟 Resuming automation from {scripts_to_run[0]}...")
+        for script in scripts_to_run:
             run_step(script)
 
     print("\n" + "="*40)
