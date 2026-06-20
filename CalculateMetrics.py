@@ -41,7 +41,9 @@ TEAM_MAP = {
     'd.rohit9@turtlemint.com': 'new', 'k.pratibha9@turtlemint.com': 'new',
     'nandini.d7@turtlemint.com': 'new', 'mohd.shaikh8@turtlemint.com': 'new',
     'sanoo.chauhan2@turtlemint.com': 'new', 'v.komal9@turtlemint.com': 'new',
-    'ritu.kamble5@turtlemint.com': 'new', 's.nitin7@turtlemint.com': 'new'
+    'ritu.kamble5@turtlemint.com': 'new', 's.nitin7@turtlemint.com': 'new',
+    'naresh.k1@turtlemint.com': 'new', 'pranali.m1@turtlemint.com': 'new',
+    'satish.k1@turtlemint.com': 'new'
 }
 
 # --- HELPERS ---
@@ -92,6 +94,11 @@ def run_metrics_workflow():
     df_unique = pd.read_excel(latest_excel, sheet_name='Health Unique DPs', engine='openpyxl')
     df_inactive_csv = pd.read_csv(inactive_csv)
     df_fav_csv = pd.read_csv(fav_csv)
+    
+    if 'agent_mapped' in df_inactive_csv.columns:
+        df_inactive_csv['agent_mapped'] = df_inactive_csv['agent_mapped'].str.strip()
+    if 'agent_mapped' in df_fav_csv.columns:
+        df_fav_csv['agent_mapped'] = df_fav_csv['agent_mapped'].str.strip()
 
     # Aggregations
     df_unique[BDM_COL_NAME] = df_unique[BDM_COL_NAME].apply(clean_string)
