@@ -7,6 +7,21 @@ DOWNLOAD_FOLDER = './downloads'
 # Environment variable passed by AutomateAll.py
 TARGET_MONTH = os.getenv("TARGET_MONTH") 
 
+def get_target_month_name():
+    target_month = os.getenv("TARGET_MONTH")
+    received_date = os.getenv("RECEIVED_DATE")
+    if target_month:
+        return target_month.strip()
+    if received_date:
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(received_date, '%d-%b-%Y')
+            return dt.strftime('%B')
+        except Exception:
+            pass
+    from datetime import datetime
+    return datetime.now().strftime('%B')
+
 def generate_athena_query():
     # 1. Find the latest file (excluding temp files)
     files = [
@@ -19,7 +34,13 @@ def generate_athena_query():
         print("❌ No valid Excel files found to process.")
         return None
     
-    latest_file = max(files, key=os.path.getctime)
+    target_month = get_target_month_name().lower()
+    filtered_files = [f for f in files if target_month in os.path.basename(f).lower()]
+    
+    if filtered_files:
+        latest_file = max(filtered_files, key=os.path.getmtime)
+    else:
+        latest_file = max(files, key=os.path.getmtime)
     print(f"🔍 Processing: {os.path.basename(latest_file)}")
 
     try:

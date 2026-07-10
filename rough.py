@@ -17,7 +17,7 @@ def get_target_date_from_excel():
     if not files:
         return None, None
     
-    latest_file = max(files, key=os.path.getctime)
+    latest_file = max(files, key=os.path.getmtime)
     df = pd.read_excel(latest_file, sheet_name='Health', engine='openpyxl')
     max_date = pd.to_datetime(df['Date']).max().strftime('%Y-%m-%d')
     return latest_file, max_date

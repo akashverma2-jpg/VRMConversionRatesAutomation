@@ -4,15 +4,36 @@ from openpyxl import load_workbook
 
 DOWNLOAD_FOLDER = './downloads'
 
+def get_target_month_name():
+    target_month = os.getenv("TARGET_MONTH")
+    received_date = os.getenv("RECEIVED_DATE")
+    if target_month:
+        return target_month.strip()
+    if received_date:
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(received_date, '%d-%b-%Y')
+            return dt.strftime('%B')
+        except Exception:
+            pass
+    from datetime import datetime
+    return datetime.now().strftime('%B')
+
 def clean_excel_sheets():
     # 1. Find the latest file
     files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) 
-             if f.endswith(('.xlsx', '.xls'))]
+             if f.endswith(('.xlsx', '.xls')) and not f.startswith('~$')]
     if not files:
         print("No Excel files found.")
-        return
+        return None
     
-    latest_file = max(files, key=os.path.getctime)
+    target_month = get_target_month_name().lower()
+    filtered_files = [f for f in files if target_month in os.path.basename(f).lower()]
+    
+    if filtered_files:
+        latest_file = max(filtered_files, key=os.path.getmtime)
+    else:
+        latest_file = max(files, key=os.path.getmtime)
     print(f"Opening file: {latest_file}")
 
     try:

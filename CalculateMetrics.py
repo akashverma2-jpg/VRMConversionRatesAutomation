@@ -67,6 +67,21 @@ def map_bdm_to_email(bdm_names, bdm_emails):
         final_mapping[name] = best_match if highest_score > 55 else "Unmapped"
     return final_mapping
 
+def get_target_month_name():
+    target_month = os.getenv("TARGET_MONTH")
+    received_date = os.getenv("RECEIVED_DATE")
+    if target_month:
+        return target_month.strip()
+    if received_date:
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(received_date, '%d-%b-%Y')
+            return dt.strftime('%B')
+        except Exception:
+            pass
+    from datetime import datetime
+    return datetime.now().strftime('%B')
+
 # --- MAIN WORKFLOW ---
 def run_metrics_workflow():
     all_files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) if not f.startswith('~$')]
@@ -75,7 +90,13 @@ def run_metrics_workflow():
     if not excel_files:
         print("❌ No Excel files found to process."); return
 
-    latest_excel = max(excel_files, key=os.path.getctime)
+    target_month = get_target_month_name().lower()
+    filtered_excel = [f for f in excel_files if target_month in os.path.basename(f).lower()]
+    
+    if filtered_excel:
+        latest_excel = max(filtered_excel, key=os.path.getmtime)
+    else:
+        latest_excel = max(excel_files, key=os.path.getmtime)
     
     # Identify Target Date and Load Sales Data from 'Health' sheet
     df_health = pd.read_excel(latest_excel, sheet_name='Health', engine='openpyxl')

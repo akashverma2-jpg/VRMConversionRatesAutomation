@@ -11,7 +11,6 @@ SESSION_DIR = "./superset_session"
 TARGET_MONTH = os.getenv("TARGET_MONTH") 
 
 # --- SQL TEMPLATES ---
-
 FAV_DP_SQL_TEMPLATE = """
 SELECT 
     agent_mapped,
@@ -23,12 +22,12 @@ FROM (
         "dp id",
         CASE 
             WHEN agent_mapped IN ('ajay.tank@turtlemint.com','surendra.rathod1@turtlemint.com','nitin.mane1@turtlemint.com','sonam.yadav3@turtlemint.com','pooja.bachche@turtlemint.com','mithilesh.yadav1@turtlemint.com','kiran.hande1@turtlemint.com','nitinkumar.dubey@turtlemint.com','rahul.goad@turtlemint.com','vijay.satpute@turtlemint.com','shraddha.chavan@turtlemint.com','sanket.kadam2@turtlemint.com','avinash.j@turtlemint.com','ali.sayyed@turtlemint.com','priyanka.yadav3@turtlemint.com','manoj.kalla@turtlemint.com') THEN 'old'
-            WHEN agent_mapped IN ('prem.ughrejiya@turtlemint.com','g.vijay9@turtlemint.com','shubham.v9@turtlemint.com','p.lakhan@turtlemint.com','k.payal8@turtlemint.com','nandini.ram3@turtlemint.com','praful.m9@turtlemint.com','b.ujwal9@turtlemint.com','dhiraj.patil9@turtlemint.com','m.rajashree9@turtlemint.com','d.rohit9@turtlemint.com','k.pratibha9@turtlemint.com','nandini.d7@turtlemint.com','mohd.shaikh8@turtlemint.com','sanoo.chauhan2@turtlemint.com','v.komal9@turtlemint.com','ritu.kamble5@turtlemint.com','s.nitin7@turtlemint.com','naresh.k1@turtlemint.com','pranali.m1@turtlemint.com','satish.k1@turtlemint.com') THEN 'new'
+            WHEN agent_mapped IN ('prem.ughrejiya@turtlemint.com','g.vijay9@turtlemint.com','shubham.v9@turtlemint.com','p.lakhan@turtlemint.com','k.payal8@turtlemint.com','nandini.ram3@turtlemint.com','praful.m9@turtlemint.com','b.ujwal9@turtlemint.com','dhiraj.patil9@turtlemint.com','m.rajashree9@turtlemint.com','d.rohit9@turtlemint.com','k.pratibha9@turtlemint.com','nandini.d7@turtlemint.com','mohd.shaikh8@turtlemint.com','sanoo.chauhan2@turtlemint.com','v.komal9@turtlemint.com','ritu.kamble5@turtlemint.com','s.nitin7@turtlemint.com','satish.k1@turtlemint.com','naresh.k1@turtlemint.com','g.vijay9@turtlemint.com','pranali.m1@turtlemint.com') THEN 'new'
             ELSE 'unknown'
         END AS team
     FROM spectrum.lglc_appsheet_dp_v2
     WHERE "dp category" = 'Favourite'
-      AND "last call disposition" NOT IN ('Remap-DP')
+      AND "last call subdiposition " not in ('Remove from CRM Forever','DP-does-not-need-assistance') 
       AND sqldate = date_format(date_add('day', -1, date_trunc('month', {{DATE_REF}})), '%Y-%m-%d')
 ) t
 GROUP BY agent_mapped, team;
@@ -124,13 +123,33 @@ FROM
 GROUP BY 1, 2
 """
 
-# --- HELPERS ---
+def get_target_month_name():
+    target_month = os.getenv("TARGET_MONTH")
+    received_date = os.getenv("RECEIVED_DATE")
+    if target_month:
+        return target_month.strip()
+    if received_date:
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(received_date, '%d-%b-%Y')
+            return dt.strftime('%B')
+        except Exception:
+            pass
+    from datetime import datetime
+    return datetime.now().strftime('%B')
 
 def get_source_file_info():
     files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) 
              if f.endswith(('.xlsx', '.xls')) and not f.startswith('~$')]
     if not files: return None, None
-    latest_excel = max(files, key=os.path.getctime)
+    
+    target_month = get_target_month_name().lower()
+    filtered_files = [f for f in files if target_month in os.path.basename(f).lower()]
+    
+    if filtered_files:
+        latest_excel = max(filtered_files, key=os.path.getmtime)
+    else:
+        latest_excel = max(files, key=os.path.getmtime)
     df = pd.read_excel(latest_excel, sheet_name='Health', engine='openpyxl')
     max_date = pd.to_datetime(df['Date']).max()
     return latest_excel, max_date.strftime('%Y-%m-%d')

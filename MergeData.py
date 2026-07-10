@@ -5,6 +5,21 @@ import re
 # --- CONFIG ---
 DOWNLOAD_FOLDER = './downloads'
 
+def get_target_month_name():
+    target_month = os.getenv("TARGET_MONTH")
+    received_date = os.getenv("RECEIVED_DATE")
+    if target_month:
+        return target_month.strip()
+    if received_date:
+        try:
+            from datetime import datetime
+            dt = datetime.strptime(received_date, '%d-%b-%Y')
+            return dt.strftime('%B')
+        except Exception:
+            pass
+    from datetime import datetime
+    return datetime.now().strftime('%B')
+
 def get_target_files():
     """
     Identifies the Excel file and the corresponding date-stamped CSV.
@@ -18,7 +33,13 @@ def get_target_files():
         return None, None, None
 
     # 1. Identify the most recently downloaded Excel file
-    latest_excel = max(excel_files, key=os.path.getctime)
+    target_month = get_target_month_name().lower()
+    filtered_excel = [f for f in excel_files if target_month in os.path.basename(f).lower()]
+    
+    if filtered_excel:
+        latest_excel = max(filtered_excel, key=os.path.getmtime)
+    else:
+        latest_excel = max(excel_files, key=os.path.getmtime)
     
     # 2. Extract the actual data date from the 'Health' sheet
     try:
@@ -33,12 +54,12 @@ def get_target_files():
     target_csv_path = os.path.join(DOWNLOAD_FOLDER, target_csv_name)
 
     if not os.path.exists(target_csv_path):
-        # Fallback to latest ctime CSV if the specific date-stamped one isn't found
+        # Fallback to latest mtime CSV if the specific date-stamped one isn't found
         print(f"⚠️ Specific file {target_csv_name} not found. Checking latest CSV...")
         csv_files = [f for f in all_files if f.endswith('.csv') and 'DP_Status' in f]
         if not csv_files:
             return latest_excel, None, data_date
-        target_csv_path = max(csv_files, key=os.path.getctime)
+        target_csv_path = max(csv_files, key=os.path.getmtime)
 
     return latest_excel, target_csv_path, data_date
 
