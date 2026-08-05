@@ -2,10 +2,25 @@ import os
 from imap_tools import MailBox
 from datetime import datetime, timedelta
 
+# Load .env file if it exists
+def load_env():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    for d in [os.getcwd(), current_dir, os.path.dirname(current_dir)]:
+        env_path = os.path.join(d, '.env')
+        if os.path.exists(env_path):
+            with open(env_path) as f:
+                for line in f:
+                    if '=' in line:
+                        key, val = line.strip().split('=', 1)
+                        os.environ[key] = val.strip().strip('"').strip("'")
+            break
+
+load_env()
+
 # --- CONFIGURATION ---
 HOST = 'imap.gmail.com'
 USERNAME = 'akash.verma2@turtlemint.com'
-PASSWORD = 'zaqw aqzu hpfs spha'
+PASSWORD = os.environ.get('GMAIL_APP_PASSWORD', '')
 DOWNLOAD_FOLDER = './downloads'
 
 SENDERS = ['istiyak.q9@turtlemint.com', 'anant.dharme@turtlemint.com']
@@ -78,12 +93,13 @@ def download_latest_attachment():
         # =========================================================
         else:
             if TARGET_MONTH:
-                tokens = [TARGET_MONTH.lower(), 'sale']
+                month_str = TARGET_MONTH.lower()
                 print(f"🔍 CATCH-UP MODE: {TARGET_MONTH}")
             else:
-                tokens = [datetime.now().strftime('%B').lower(), 'sale']
+                month_str = datetime.now().strftime('%B').lower()
                 print(f"🔍 REGULAR MODE")
 
+            short_month = month_str[:3]
             filtered = []
 
             for msg in messages:
@@ -92,7 +108,8 @@ def download_latest_attachment():
 
                 subject = (msg.subject or "").lower()
 
-                if all(token in subject for token in tokens):
+                # Check that 'sale' is present, and either the full month name or short month name is present
+                if 'sale' in subject and (month_str in subject or short_month in subject):
                     filtered.append(msg)
 
             if not filtered:
