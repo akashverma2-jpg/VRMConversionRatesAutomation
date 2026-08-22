@@ -43,7 +43,9 @@ TEAM_MAP = {
     'sanoo.chauhan2@turtlemint.com': 'new', 'v.komal9@turtlemint.com': 'new',
     'ritu.kamble5@turtlemint.com': 'new', 's.nitin7@turtlemint.com': 'new',
     'naresh.k1@turtlemint.com': 'new', 'pranali.m1@turtlemint.com': 'new',
-    'satish.k1@turtlemint.com': 'new'
+    'satish.k1@turtlemint.com': 'new',
+    'gulshan.s1@turtlemint.com': 'old', 'maurya.vishal1@turtlemint.com': 'old',
+    'sonam.p1@turtlemint.com': 'old'
 }
 
 # --- HELPERS ---

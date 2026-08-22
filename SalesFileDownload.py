@@ -44,8 +44,10 @@ def download_latest_attachment():
 
     with MailBox(HOST).login(USERNAME, PASSWORD) as mailbox:
 
-        # 🔥 FETCH BROAD (NO FILTERS)
-        messages = list(mailbox.fetch(reverse=True, limit=100))
+        # 🔥 FETCH FILTERED (BY AUTHORIZED SENDERS)
+        # Using raw IMAP search criteria to ensure compatibility with Gmail's IMAP search engine
+        sender_criteria = 'OR FROM "istiyak.q9@turtlemint.com" FROM "anant.dharme@turtlemint.com"'
+        messages = list(mailbox.fetch(criteria=sender_criteria, reverse=True, limit=100))
 
         if not messages:
             print("❌ No emails found in inbox.")
