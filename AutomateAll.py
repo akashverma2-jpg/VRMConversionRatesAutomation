@@ -53,7 +53,7 @@ def main():
     print("="*40)
 
     scripts = ["SalesFileDownload.py", "SalesFileCleaning.py", "QueryGenerator.py", 
-               "SupersetBot.py", "MergeData.py", "CollateSalesData.py", "CalculateMetrics.py", "CalculateWeeklyMetrics.py"]
+               "SupersetBot.py", "MergeData.py", "CollateSalesData.py", "CalculateMetrics.py", "CalculateWeeklyMetrics.py", "UpdateDashboard.py"]
 
     print("Available Steps:")
     for i, script in enumerate(scripts, 1):

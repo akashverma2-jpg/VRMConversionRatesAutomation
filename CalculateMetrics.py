@@ -109,7 +109,10 @@ def run_metrics_workflow():
 
     # Load specific date-stamped CSVs
     inactive_csv = os.path.join(DOWNLOAD_FOLDER, f"InactiveSupply_{data_date}.csv")
-    fav_csv = os.path.join(DOWNLOAD_FOLDER, f"Fav_DP_Count_{data_date}.csv")
+    if data_date.startswith("2026-08"):
+        fav_csv = os.path.join(DOWNLOAD_FOLDER, "Fav_DP_Count_2026-07-31.csv")
+    else:
+        fav_csv = os.path.join(DOWNLOAD_FOLDER, f"Fav_DP_Count_{data_date}.csv")
 
     if not os.path.exists(inactive_csv) or not os.path.exists(fav_csv):
         print(f"❌ Denominator CSVs for {data_date} missing. Metrics skipped."); return
@@ -205,12 +208,52 @@ def run_metrics_workflow():
 
     # Update Trend Tracker
     if os.path.exists(TREND_TRACKER_FILE):
-        df_trend = pd.read_excel(TREND_TRACKER_FILE)
-        df_trend['Date'] = pd.to_datetime(df_trend['Date']).dt.strftime('%Y-%m-%d')
-        df_trend = pd.concat([df_trend[df_trend['Date'] != data_date], pd.DataFrame([new_trend_row])], ignore_index=True)
+        try:
+            df_trend = pd.read_excel(TREND_TRACKER_FILE, sheet_name='Sheet1')
+        except Exception:
+            df_trend = pd.DataFrame()
+        
+        try:
+            df_targets = pd.read_excel(TREND_TRACKER_FILE, sheet_name='Targets')
+        except Exception:
+            df_targets = pd.DataFrame(columns=['Month', 'Activation Target', 'Favourite Target', 'Consolidated Target'])
+            
+        if not df_trend.empty:
+            df_trend['Date'] = pd.to_datetime(df_trend['Date']).dt.strftime('%Y-%m-%d')
+            df_trend = pd.concat([df_trend[df_trend['Date'] != data_date], pd.DataFrame([new_trend_row])], ignore_index=True)
+        else:
+            df_trend = pd.DataFrame([new_trend_row])
     else:
         df_trend = pd.DataFrame([new_trend_row])
-    df_trend.sort_values(by='Date').to_excel(TREND_TRACKER_FILE, index=False)
+        df_targets = pd.DataFrame(columns=['Month', 'Activation Target', 'Favourite Target', 'Consolidated Target'])
+
+    # Ensure target month exists in df_targets
+    try:
+        dt_obj = datetime.strptime(data_date, '%Y-%m-%d')
+        target_month_str = dt_obj.strftime('%Y-%m')
+    except Exception:
+        target_month_str = datetime.now().strftime('%Y-%m')
+        
+    if df_targets.empty or 'Month' not in df_targets.columns:
+        df_targets = pd.DataFrame([{
+            'Month': target_month_str,
+            'Activation Target': 2.5,
+            'Favourite Target': 15.0,
+            'Consolidated Target': 9.0
+        }])
+    elif target_month_str not in df_targets['Month'].values:
+        new_target_row = {
+            'Month': target_month_str,
+            'Activation Target': 2.5,
+            'Favourite Target': 15.0,
+            'Consolidated Target': 9.0
+        }
+        df_targets = pd.concat([df_targets, pd.DataFrame([new_target_row])], ignore_index=True)
+
+    # Save both sheets
+    with pd.ExcelWriter(TREND_TRACKER_FILE, engine='openpyxl') as writer:
+        df_trend.sort_values(by='Date').to_excel(writer, sheet_name='Sheet1', index=False)
+        df_targets.sort_values(by='Month').to_excel(writer, sheet_name='Targets', index=False)
 
     # Output Detailed Breakdown
     output_file = f"Performance_Breakdown_{data_date}.xlsx"

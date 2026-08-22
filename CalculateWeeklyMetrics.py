@@ -12,10 +12,15 @@ def get_monthly_fav_pool(month_str):
     Finds the Favourite DP count for a given month (YYYY-MM).
     Since it's fixed for the month, any file for that month will have the same total.
     """
-    fav_files = [f for f in os.listdir(DOWNLOAD_FOLDER) if f.startswith(f'Fav_DP_Count_{month_str}')]
-    if not fav_files:
-        return 0
-    df = pd.read_csv(os.path.join(DOWNLOAD_FOLDER, fav_files[0]))
+    if month_str == '2026-08':
+        target_file = 'Fav_DP_Count_2026-07-31.csv'
+    else:
+        fav_files = [f for f in os.listdir(DOWNLOAD_FOLDER) if f.startswith(f'Fav_DP_Count_{month_str}')]
+        if not fav_files:
+            return 0
+        target_file = fav_files[0]
+        
+    df = pd.read_csv(os.path.join(DOWNLOAD_FOLDER, target_file))
     return df['dp_count'].sum()
 
 def calculate_weekly_daily_metrics():
