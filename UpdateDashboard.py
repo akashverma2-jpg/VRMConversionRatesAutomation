@@ -144,7 +144,7 @@ def main():
     commit_msg = f"Auto-update metrics trend dashboard: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
     run_command(f'git commit -m "{commit_msg}"', DASHBOARD_DIR)
     
-    push_res = run_command("git push origin main", DASHBOARD_DIR)
+    push_res = run_command("GIT_TERMINAL_PROMPT=0 git push origin main", DASHBOARD_DIR)
     if push_res.returncode == 0:
         print("🎉 Successfully pushed to GitHub! The hosted dashboard will update shortly.")
     else:

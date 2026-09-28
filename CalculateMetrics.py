@@ -86,7 +86,7 @@ def run_metrics_workflow():
 
     # Load specific date-stamped CSVs
     inactive_csv = os.path.join(DOWNLOAD_FOLDER, f"InactiveSupply_{data_date}.csv")
-    if data_date.startswith("2026-08"):
+    if data_date.startswith("2026-08") or data_date.startswith("2026-09"):
         fav_csv = os.path.join(DOWNLOAD_FOLDER, "Fav_DP_Count_2026-07-31.csv")
     else:
         fav_csv = os.path.join(DOWNLOAD_FOLDER, f"Fav_DP_Count_{data_date}.csv")

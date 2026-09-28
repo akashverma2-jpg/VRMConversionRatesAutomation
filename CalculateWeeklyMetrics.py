@@ -12,7 +12,7 @@ def get_monthly_fav_pool(month_str):
     Finds the Favourite DP count for a given month (YYYY-MM).
     Since it's fixed for the month, any file for that month will have the same total.
     """
-    if month_str == '2026-08':
+    if month_str in ('2026-08', '2026-09'):
         target_file = 'Fav_DP_Count_2026-07-31.csv'
     else:
         fav_files = sorted([f for f in os.listdir(DOWNLOAD_FOLDER) if f.startswith(f'Fav_DP_Count_{month_str}')])
