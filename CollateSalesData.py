@@ -8,36 +8,13 @@ MASTER_FILE = 'Collated_Sales_Master.xlsx'
 
 ## comment
 
-def get_target_month_name():
-    target_month = os.getenv("TARGET_MONTH")
-    received_date = os.getenv("RECEIVED_DATE")
-    if target_month:
-        return target_month.strip()
-    if received_date:
-        try:
-            from datetime import datetime
-            dt = datetime.strptime(received_date, '%d-%b-%Y')
-            return dt.strftime('%B')
-        except Exception:
-            pass
-    from datetime import datetime
-    return datetime.now().strftime('%B')
+from PipelineUtils import get_target_sales_file, get_target_month_name
 
 def collate_sales_data():
-    all_files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) if not f.startswith('~$')]
-    excel_files = [f for f in all_files if f.endswith(('.xlsx', '.xls'))]
-    
-    if not excel_files:
+    latest_excel = get_target_sales_file(DOWNLOAD_FOLDER)
+    if not latest_excel:
         print("❌ No Excel files found to collate.")
         return
-
-    target_month = get_target_month_name().lower()
-    filtered_excel = [f for f in excel_files if target_month in os.path.basename(f).lower()]
-    
-    if filtered_excel:
-        latest_excel = max(filtered_excel, key=os.path.getmtime)
-    else:
-        latest_excel = max(excel_files, key=os.path.getmtime)
     print(f"\n📂 Collating Data from: {os.path.basename(latest_excel)}")
 
     try:

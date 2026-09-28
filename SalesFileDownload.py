@@ -151,6 +151,12 @@ def download_latest_attachment():
                     f.write(att.payload)
 
                 print(f"✅ Downloaded: {att.filename}")
+                marker_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.current_sales_file.txt')
+                try:
+                    with open(marker_file, 'w') as mf:
+                        mf.write(os.path.abspath(path))
+                except Exception:
+                    pass
                 return path
 
         print("⚠️ No Excel attachment found.")

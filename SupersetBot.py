@@ -123,33 +123,12 @@ FROM
 GROUP BY 1, 2
 """
 
-def get_target_month_name():
-    target_month = os.getenv("TARGET_MONTH")
-    received_date = os.getenv("RECEIVED_DATE")
-    if target_month:
-        return target_month.strip()
-    if received_date:
-        try:
-            from datetime import datetime
-            dt = datetime.strptime(received_date, '%d-%b-%Y')
-            return dt.strftime('%B')
-        except Exception:
-            pass
-    from datetime import datetime
-    return datetime.now().strftime('%B')
+from PipelineUtils import get_target_sales_file, get_target_month_name
 
 def get_source_file_info():
-    files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) 
-             if f.endswith(('.xlsx', '.xls')) and not f.startswith('~$')]
-    if not files: return None, None
-    
-    target_month = get_target_month_name().lower()
-    filtered_files = [f for f in files if target_month in os.path.basename(f).lower()]
-    
-    if filtered_files:
-        latest_excel = max(filtered_files, key=os.path.getmtime)
-    else:
-        latest_excel = max(files, key=os.path.getmtime)
+    latest_excel = get_target_sales_file(DOWNLOAD_FOLDER)
+    if not latest_excel:
+        return None, None
     df = pd.read_excel(latest_excel, sheet_name='Health', engine='openpyxl')
     max_date = pd.to_datetime(df['Date']).max()
     return latest_excel, max_date.strftime('%Y-%m-%d')
@@ -216,7 +195,11 @@ def run_automation():
         context = p.chromium.launch_persistent_context(SESSION_DIR, headless=False)
         page = context.pages[0]
         page.goto(URL)
+        print("⏳ Waiting for Superset SQL Lab to load (if prompted to log in, please complete login in the browser)...")
         page.wait_for_url("**/sqllab/**", timeout=0)
+        page.wait_for_selector(".ace_editor", timeout=0)
+        page.wait_for_timeout(2000)
+        print("✅ Superset SQL Lab ready!")
         
         # Sequentially process all three downloads
         run_query_and_download(page, dp_status_sql, status_csv)

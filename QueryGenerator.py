@@ -2,45 +2,19 @@ import pandas as pd
 import os
 from datetime import datetime
 
+from PipelineUtils import get_target_sales_file, get_target_month_name
+
 # --- CONFIG ---
 DOWNLOAD_FOLDER = './downloads'
 # Environment variable passed by AutomateAll.py
 TARGET_MONTH = os.getenv("TARGET_MONTH") 
 
-def get_target_month_name():
-    target_month = os.getenv("TARGET_MONTH")
-    received_date = os.getenv("RECEIVED_DATE")
-    if target_month:
-        return target_month.strip()
-    if received_date:
-        try:
-            from datetime import datetime
-            dt = datetime.strptime(received_date, '%d-%b-%Y')
-            return dt.strftime('%B')
-        except Exception:
-            pass
-    from datetime import datetime
-    return datetime.now().strftime('%B')
-
 def generate_athena_query():
-    # 1. Find the latest file (excluding temp files)
-    files = [
-        os.path.join(DOWNLOAD_FOLDER, f) 
-        for f in os.listdir(DOWNLOAD_FOLDER) 
-        if f.endswith(('.xlsx', '.xls')) and not f.startswith('~$')
-    ]
-    
-    if not files:
+    # 1. Find the latest file robustly (month abbreviation + internal max date)
+    latest_file = get_target_sales_file(DOWNLOAD_FOLDER)
+    if not latest_file:
         print("❌ No valid Excel files found to process.")
         return None
-    
-    target_month = get_target_month_name().lower()
-    filtered_files = [f for f in files if target_month in os.path.basename(f).lower()]
-    
-    if filtered_files:
-        latest_file = max(filtered_files, key=os.path.getmtime)
-    else:
-        latest_file = max(files, key=os.path.getmtime)
     print(f"🔍 Processing: {os.path.basename(latest_file)}")
 
     try:

@@ -5,42 +5,18 @@ import re
 # --- CONFIG ---
 DOWNLOAD_FOLDER = './downloads'
 
-def get_target_month_name():
-    target_month = os.getenv("TARGET_MONTH")
-    received_date = os.getenv("RECEIVED_DATE")
-    if target_month:
-        return target_month.strip()
-    if received_date:
-        try:
-            from datetime import datetime
-            dt = datetime.strptime(received_date, '%d-%b-%Y')
-            return dt.strftime('%B')
-        except Exception:
-            pass
-    from datetime import datetime
-    return datetime.now().strftime('%B')
+from PipelineUtils import get_target_sales_file, get_target_month_name
 
 def get_target_files():
     """
     Identifies the Excel file and the corresponding date-stamped CSV.
-    Ensures that data for April 30th merges with the April 30th status CSV.
+    Ensures that data for a specific date strictly merges with its matching status CSV.
     """
-    all_files = [os.path.join(DOWNLOAD_FOLDER, f) for f in os.listdir(DOWNLOAD_FOLDER) if not f.startswith('~$')]
-    excel_files = [f for f in all_files if f.endswith(('.xlsx', '.xls'))]
-    
-    if not excel_files:
+    latest_excel = get_target_sales_file(DOWNLOAD_FOLDER)
+    if not latest_excel:
         print("❌ No Excel files found in downloads folder.")
         return None, None, None
 
-    # 1. Identify the most recently downloaded Excel file
-    target_month = get_target_month_name().lower()
-    filtered_excel = [f for f in excel_files if target_month in os.path.basename(f).lower()]
-    
-    if filtered_excel:
-        latest_excel = max(filtered_excel, key=os.path.getmtime)
-    else:
-        latest_excel = max(excel_files, key=os.path.getmtime)
-    
     # 2. Extract the actual data date from the 'Health' sheet
     try:
         df_date = pd.read_excel(latest_excel, sheet_name='Health', engine='openpyxl')
@@ -54,12 +30,9 @@ def get_target_files():
     target_csv_path = os.path.join(DOWNLOAD_FOLDER, target_csv_name)
 
     if not os.path.exists(target_csv_path):
-        # Fallback to latest mtime CSV if the specific date-stamped one isn't found
-        print(f"⚠️ Specific file {target_csv_name} not found. Checking latest CSV...")
-        csv_files = [f for f in all_files if f.endswith('.csv') and 'DP_Status' in f]
-        if not csv_files:
-            return latest_excel, None, data_date
-        target_csv_path = max(csv_files, key=os.path.getmtime)
+        print(f"❌ Error: Required status CSV '{target_csv_name}' not found for data date {data_date}.")
+        print("   Please ensure SupersetBot.py ran and downloaded the CSV before running MergeData.")
+        return latest_excel, None, data_date
 
     return latest_excel, target_csv_path, data_date
 

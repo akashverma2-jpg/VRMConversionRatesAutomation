@@ -33,12 +33,15 @@ def check_month_completion():
     
     return None, False
 
-def run_step(script_name, target_month=None, manual_sub=None, manual_date=None):
+from PipelineUtils import get_target_sales_file
+
+def run_step(script_name, target_month=None, manual_sub=None, manual_date=None, current_file=None):
     env = os.environ.copy()
-    # Aligning names with SalesFileDownload.py expectations
+    # Aligning names with downstream script expectations
     if target_month: env["TARGET_MONTH"] = target_month
     if manual_sub: env["SUBJECT_KEYWORD"] = manual_sub
     if manual_date: env["RECEIVED_DATE"] = manual_date
+    if current_file: env["CURRENT_SALES_FILE"] = current_file
     
     print(f"\n⌛ Running {script_name}...")
     process = subprocess.run([sys.executable, script_name], env=env)
@@ -46,6 +49,15 @@ def run_step(script_name, target_month=None, manual_sub=None, manual_date=None):
     if process.returncode != 0:
         print(f"❌ CRITICAL ERROR in {script_name}. Pipeline stopped.")
         sys.exit(1)
+
+def run_pipeline(scripts_to_run, target_month=None, manual_sub=None, manual_date=None):
+    current_file = get_target_sales_file()
+    for script in scripts_to_run:
+        run_step(script, target_month=target_month, manual_sub=manual_sub, manual_date=manual_date, current_file=current_file)
+        if script == "SalesFileDownload.py":
+            current_file = get_target_sales_file()
+            if current_file:
+                print(f"📌 Pipeline file pinned to: {os.path.basename(current_file)}")
 
 def main():
     print("="*40)
@@ -84,8 +96,7 @@ def main():
             date_str = input("📅 Enter Date (DD-Mon-YYYY): ").strip()
             
             print(f"\n🎯 Targeted Run: {sub} from {date_str}")
-            for script in scripts_to_run:
-                run_step(script, manual_sub=sub, manual_date=date_str)
+            run_pipeline(scripts_to_run, manual_sub=sub, manual_date=date_str)
 
         else:
             # --- AUTO-RUN MODE ---
@@ -96,19 +107,16 @@ def main():
                 print(f"\n🚨 GAP DETECTED: {missing_month} is incomplete in {TREND_FILE}.")
                 catch_up = input(f"❓ Run catch-up for {missing_month}? (y/n): ")
                 if catch_up.lower() == 'y':
-                    for script in scripts_to_run:
-                        run_step(script, target_month=missing_month)
+                    run_pipeline(scripts_to_run, target_month=missing_month)
                     print(f"\n✅ Catch-up for {missing_month} complete.")
 
             # 2. Run for current month
             print("\n🌟 Starting regular current month automation...")
-            for script in scripts_to_run:
-                run_step(script)
+            run_pipeline(scripts_to_run)
     else:
         # Resuming from a later step (skip the mode prompt)
         print(f"\n🌟 Resuming automation from {scripts_to_run[0]}...")
-        for script in scripts_to_run:
-            run_step(script)
+        run_pipeline(scripts_to_run)
 
     print("\n" + "="*40)
     print("🏁 ALL TASKS FINISHED SUCCESSFULLY.")
