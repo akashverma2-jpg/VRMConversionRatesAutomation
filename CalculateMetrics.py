@@ -23,29 +23,64 @@ else:
     RUN_MODE = "REGULAR"
 
 # --- MANUAL OVERRIDES & TEAM MAP ---
-MANUAL_OVERRIDES = {'ALI ABBAS': 'ali.sayyed@turtlemint.com'}
+MANUAL_OVERRIDES = {
+    'ALI ABBAS': 'ali.sayyed@turtlemint.com',
+    'HANNAN SHAIKH': 'abdul.s8@turtlemint.com',
+    'ABDUL HANNAN SHAIKH': 'abdul.s8@turtlemint.com',
+    'ABDUL SHAIKH': 'abdul.s8@turtlemint.com'
+}
+
 TEAM_MAP = {
-    'ajay.tank@turtlemint.com': 'old', 'surendra.rathod1@turtlemint.com': 'old',
-    'nitin.mane1@turtlemint.com': 'old', 'sonam.yadav3@turtlemint.com': 'old',
-    'pooja.bachche@turtlemint.com': 'old', 'mithilesh.yadav1@turtlemint.com': 'old',
-    'prem.ughrejiya@turtlemint.com': 'new', 'kiran.hande1@turtlemint.com': 'old',
-    'nitinkumar.dubey@turtlemint.com': 'old', 'rahul.goad@turtlemint.com': 'old',
-    'vijay.satpute@turtlemint.com': 'old', 'shraddha.chavan@turtlemint.com': 'old',
-    'sanket.kadam2@turtlemint.com': 'old', 'avinash.j@turtlemint.com': 'old',
-    'ali.sayyed@turtlemint.com': 'old', 'priyanka.yadav3@turtlemint.com': 'old',
-    'manoj.kalla@turtlemint.com': 'old', 'g.vijay9@turtlemint.com': 'new',
-    'shubham.v9@turtlemint.com': 'new', 'p.lakhan@turtlemint.com': 'new',
-    'k.payal8@turtlemint.com': 'new', 'nandini.ram3@turtlemint.com': 'new',
-    'praful.m9@turtlemint.com': 'new', 'b.ujwal9@turtlemint.com': 'new',
-    'dhiraj.patil9@turtlemint.com': 'new', 'm.rajashree9@turtlemint.com': 'new',
-    'd.rohit9@turtlemint.com': 'new', 'k.pratibha9@turtlemint.com': 'new',
-    'nandini.d7@turtlemint.com': 'new', 'mohd.shaikh8@turtlemint.com': 'new',
-    'sanoo.chauhan2@turtlemint.com': 'new', 'v.komal9@turtlemint.com': 'new',
-    'ritu.kamble5@turtlemint.com': 'new', 's.nitin7@turtlemint.com': 'new',
-    'naresh.k1@turtlemint.com': 'new', 'pranali.m1@turtlemint.com': 'new',
+    # Anant -> 'old'
+    'ajay.tank@turtlemint.com': 'old',
+    'ali.sayyed@turtlemint.com': 'old',
+    'avinash.j@turtlemint.com': 'old',
+    'manoj.kalla@turtlemint.com': 'old',
+    'nitin.mane1@turtlemint.com': 'old',
+    'nitinkumar.dubey@turtlemint.com': 'old',
+    'pooja.bachche@turtlemint.com': 'old',
+    'shraddha.chavan@turtlemint.com': 'old',
+    'surendra.rathod1@turtlemint.com': 'old',
+    'vijay.satpute@turtlemint.com': 'old',
+    'mithilesh.yadav1@turtlemint.com': 'old',
+    'gulshan.s1@turtlemint.com': 'old',
+    'maurya.vishal1@turtlemint.com': 'old',
+    'sonam.p1@turtlemint.com': 'old',
+    'muzammil.kazi1@turtlemint.com': 'old',
+    'sonam.yadav3@turtlemint.com': 'old',
+    'kiran.hande1@turtlemint.com': 'old',
+    'rahul.goad@turtlemint.com': 'old',
+    'sanket.kadam2@turtlemint.com': 'old',
+    'priyanka.yadav3@turtlemint.com': 'old',
+
+    # Istiyak -> 'new'
+    'g.vijay9@turtlemint.com': 'new',
+    'p.lakhan@turtlemint.com': 'new',
+    'm.rajashree9@turtlemint.com': 'new',
+    'mohd.shaikh8@turtlemint.com': 'new',
+    'dhiraj.patil9@turtlemint.com': 'new',
+    'shubham.v9@turtlemint.com': 'new',
+    'd.rohit9@turtlemint.com': 'new',
+    'k.pratibha9@turtlemint.com': 'new',
+    'sanoo.chauhan2@turtlemint.com': 'new',
+    'naresh.k1@turtlemint.com': 'new',
     'satish.k1@turtlemint.com': 'new',
-    'gulshan.s1@turtlemint.com': 'old', 'maurya.vishal1@turtlemint.com': 'old',
-    'sonam.p1@turtlemint.com': 'old'
+    'pranali.m1@turtlemint.com': 'new',
+    'nandini.ram1@turtlemint.com': 'new',
+    'shweta.k1@turtlemint.com': 'new',
+    'mayuri2@turtlemint.com': 'new',
+    'shaikh.rehan1@turtlemint.com': 'new',
+    'abdul.s8@turtlemint.com': 'new',
+    'aparna.bhise1@turtlemint.com': 'new',
+    'prem.ughrejiya@turtlemint.com': 'new',
+    'k.payal8@turtlemint.com': 'new',
+    'nandini.ram3@turtlemint.com': 'new',
+    'praful.m9@turtlemint.com': 'new',
+    'b.ujwal9@turtlemint.com': 'new',
+    'nandini.d7@turtlemint.com': 'new',
+    'v.komal9@turtlemint.com': 'new',
+    'ritu.kamble5@turtlemint.com': 'new',
+    's.nitin7@turtlemint.com': 'new'
 }
 
 # --- HELPERS ---
@@ -98,42 +133,68 @@ def run_metrics_workflow():
     df_inactive_csv = pd.read_csv(inactive_csv)
     df_fav_csv = pd.read_csv(fav_csv)
     
-    if 'agent_mapped' in df_inactive_csv.columns:
-        df_inactive_csv['agent_mapped'] = df_inactive_csv['agent_mapped'].str.strip()
-    if 'agent_mapped' in df_fav_csv.columns:
-        df_fav_csv['agent_mapped'] = df_fav_csv['agent_mapped'].str.strip()
+    # 2. Extract Denominators (Supports both granular and legacy aggregated formats)
+    # Favourite Denominator
+    if 'dp_id' in df_fav_csv.columns:
+        df_fav_clean = df_fav_csv.dropna(subset=['agent_mapped', 'dp_id']).copy()
+        df_fav_clean['agent_mapped'] = df_fav_clean['agent_mapped'].astype(str).str.strip().str.lower()
+        df_den_fav = df_fav_clean.groupby('agent_mapped')['dp_id'].nunique().reset_index(name='Fav_Den')
+        fav_d = df_fav_clean['dp_id'].nunique()
+    elif 'dp_count' in df_fav_csv.columns:
+        df_fav_clean = df_fav_csv.dropna(subset=['agent_mapped']).copy()
+        df_fav_clean['agent_mapped'] = df_fav_clean['agent_mapped'].astype(str).str.strip().str.lower()
+        df_den_fav = df_fav_clean.groupby('agent_mapped')['dp_count'].sum().reset_index(name='Fav_Den')
+        fav_d = df_den_fav['Fav_Den'].sum()
+    else:
+        fav_d = len(df_fav_csv)
+        df_den_fav = pd.DataFrame(columns=['agent_mapped', 'Fav_Den'])
 
-    # Aggregations
-    df_unique[BDM_COL_NAME] = df_unique[BDM_COL_NAME].apply(clean_string)
-    bdm_to_email_map = map_bdm_to_email(df_unique[BDM_COL_NAME].dropna().unique(), list(TEAM_MAP.keys()))
-    df_unique['Email'] = df_unique[BDM_COL_NAME].map(bdm_to_email_map)
+    # Inactive Denominator
+    inact_agent_col = 'agent mapped' if 'agent mapped' in df_inactive_csv.columns else 'agent_mapped'
+    inact_dp_col = 'dp id' if 'dp id' in df_inactive_csv.columns else ('dp_id' if 'dp_id' in df_inactive_csv.columns else None)
+    
+    if inact_dp_col and inact_dp_col in df_inactive_csv.columns:
+        df_inact_clean = df_inactive_csv.dropna(subset=[inact_agent_col, inact_dp_col]).copy()
+        df_inact_clean['agent_mapped'] = df_inact_clean[inact_agent_col].astype(str).str.strip().str.lower()
+        df_den_act = df_inact_clean.groupby('agent_mapped')[inact_dp_col].nunique().reset_index(name='Act_Den')
+        act_d = df_inact_clean[inact_dp_col].nunique()
+    elif 'sum_inactive_dps_creating_quotes' in df_inactive_csv.columns:
+        df_inact_clean = df_inactive_csv.dropna(subset=[inact_agent_col]).copy()
+        df_inact_clean['agent_mapped'] = df_inact_clean[inact_agent_col].astype(str).str.strip().str.lower()
+        df_den_act = df_inact_clean.groupby('agent_mapped')['sum_inactive_dps_creating_quotes'].sum().reset_index(name='Act_Den')
+        act_d = df_den_act['Act_Den'].sum()
+    else:
+        act_d = len(df_inactive_csv)
+        df_den_act = pd.DataFrame(columns=['agent_mapped', 'Act_Den'])
 
     # 1. Get Numerators from Unique DPs
+    df_unique[BDM_COL_NAME] = df_unique[BDM_COL_NAME].apply(clean_string)
+    bdm_to_email_map = map_bdm_to_email(df_unique[BDM_COL_NAME].dropna().unique(), list(TEAM_MAP.keys()))
+    df_unique['Email'] = df_unique[BDM_COL_NAME].map(bdm_to_email_map).astype(str).str.strip().str.lower()
+
     df_num = df_unique.groupby('Email').agg(
         Act_Num=('DP Status', lambda x: (x == 'Inactive').sum()),
         Fav_Num=('DP Status', lambda x: x.isin(['Activated by LGLC', 'Already Active']).sum()),
         Con_Num=('DP Status', 'count')
     ).reset_index()
 
-    # 2. Get Denominators from CSVs
-    df_den_act = df_inactive_csv.groupby('agent_mapped')['sum_inactive_dps_creating_quotes'].sum().reset_index()
-    df_den_fav = df_fav_csv.groupby('agent_mapped')['dp_count'].sum().reset_index()
+    # 3. Clean Master Outer Merge across all emails
+    all_emails = sorted(list(set(
+        df_num['Email'].dropna().tolist() + 
+        df_den_act['agent_mapped'].dropna().tolist() + 
+        df_den_fav['agent_mapped'].dropna().tolist()
+    )))
 
-    # 3. Merge them using an OUTER join to catch everyone
-    df_email = pd.merge(df_num, df_den_act, left_on='Email', right_on='agent_mapped', how='outer')
-    df_email = pd.merge(df_email, df_den_fav, left_on='Email', right_on='agent_mapped', how='outer')
-
-    # 4. Clean up columns and fill NaNs
-    df_email['Email'] = df_email['Email'].fillna(df_email['agent_mapped_x']).fillna(df_email['agent_mapped_y'])
-    df_email = df_email.drop(columns=['agent_mapped_x', 'agent_mapped_y'])
-    df_email = df_email.fillna(0)
-
-    # Rename for consistency
-    df_email.columns = ['Email', 'Act_Num', 'Fav_Num', 'Con_Num', 'Act_Den', 'Fav_Den']
+    df_email = pd.DataFrame({'Email': all_emails})
+    df_email = pd.merge(df_email, df_num, on='Email', how='left').fillna(0)
+    df_email = pd.merge(df_email, df_den_act, left_on='Email', right_on='agent_mapped', how='left').fillna(0)
+    df_email = pd.merge(df_email, df_den_fav, left_on='Email', right_on='agent_mapped', how='left').fillna(0)
+    df_email = df_email[['Email', 'Act_Num', 'Fav_Num', 'Con_Num', 'Act_Den', 'Fav_Den']]
     df_email['Con_Den'] = df_email['Act_Den'] + df_email['Fav_Den']
 
     # Team Level Metrics
-    df_email['Team'] = df_email['Email'].map(TEAM_MAP).fillna('unknown')
+    team_dict = {k.lower(): v for k, v in TEAM_MAP.items()}
+    df_email['Team'] = df_email['Email'].map(team_dict).fillna('unknown')
     df_team = df_email.groupby('Team').agg(
         Act_Num=('Act_Num', 'sum'),
         Fav_Num=('Fav_Num', 'sum'),
@@ -146,10 +207,11 @@ def run_metrics_workflow():
     df_team['Favourite Conv Rate'] = df_team.apply(lambda row: row['Fav_Num'] / row['Fav_Den'] if row['Fav_Den'] > 0 else 0, axis=1)
     df_team['Consolidated Rate'] = df_team.apply(lambda row: row['Con_Num'] / row['Con_Den'] if row['Con_Den'] > 0 else 0, axis=1)
 
-    # Final Overall Row
-    act_n, act_d = df_email['Act_Num'].sum(), df_inactive_csv['sum_inactive_dps_creating_quotes'].sum()
-    fav_n, fav_d = df_email['Fav_Num'].sum(), df_fav_csv['dp_count'].sum()
-    con_n, con_d = df_email['Con_Num'].sum(), act_d + fav_d
+    # Final Overall Totals
+    act_n = df_email['Act_Num'].sum()
+    fav_n = df_email['Fav_Num'].sum()
+    con_n = df_email['Con_Num'].sum()
+    con_d = act_d + fav_d
 
     # Calculate New Overall Metrics
     df_health['Net Premium'] = pd.to_numeric(df_health['Net Premium'], errors='coerce').fillna(0)

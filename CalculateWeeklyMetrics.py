@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import re
 from datetime import datetime
 
 # --- CONFIG ---
@@ -15,13 +16,17 @@ def get_monthly_fav_pool(month_str):
     if month_str in ('2026-08', '2026-09'):
         target_file = 'Fav_DP_Count_2026-07-31.csv'
     else:
-        fav_files = sorted([f for f in os.listdir(DOWNLOAD_FOLDER) if f.startswith(f'Fav_DP_Count_{month_str}')])
+        fav_files = sorted([f for f in os.listdir(DOWNLOAD_FOLDER) if re.match(rf'^Fav_DP_Count_{month_str}-\d{{2}}\.csv$', f)])
         if not fav_files:
             return 0
         target_file = fav_files[-1]
         
     df = pd.read_csv(os.path.join(DOWNLOAD_FOLDER, target_file))
-    return df['dp_count'].sum()
+    if 'dp_id' in df.columns:
+        return df['dp_id'].nunique()
+    elif 'dp_count' in df.columns:
+        return df['dp_count'].sum()
+    return len(df)
 
 def calculate_weekly_daily_metrics():
     if not os.path.exists(MASTER_FILE):
@@ -36,7 +41,7 @@ def calculate_weekly_daily_metrics():
     sales_dates = set(df_master['Date'].dt.strftime('%Y-%m-%d').unique())
     
     # We need supply CSVs to calculate anything
-    supply_files = [f for f in os.listdir(DOWNLOAD_FOLDER) if f.startswith('InactiveSupply_') and f.endswith('.csv')]
+    supply_files = [f for f in os.listdir(DOWNLOAD_FOLDER) if re.match(r'^InactiveSupply_\d{4}-\d{2}-\d{2}\.csv$', f)]
     supply_dates = sorted([f.replace('InactiveSupply_', '').replace('.csv', '') for f in supply_files])
     
     if not supply_dates:
@@ -47,7 +52,14 @@ def calculate_weekly_daily_metrics():
     mtd_supply_map = {}
     for d_str in supply_dates:
         df_sup = pd.read_csv(os.path.join(DOWNLOAD_FOLDER, f"InactiveSupply_{d_str}.csv"))
-        mtd_supply_map[d_str] = df_sup['sum_inactive_dps_creating_quotes'].sum()
+        if 'dp id' in df_sup.columns:
+            mtd_supply_map[d_str] = df_sup['dp id'].nunique()
+        elif 'dp_id' in df_sup.columns:
+            mtd_supply_map[d_str] = df_sup['dp_id'].nunique()
+        elif 'sum_inactive_dps_creating_quotes' in df_sup.columns:
+            mtd_supply_map[d_str] = df_sup['sum_inactive_dps_creating_quotes'].sum()
+        else:
+            mtd_supply_map[d_str] = len(df_sup)
 
     daily_results = []
     

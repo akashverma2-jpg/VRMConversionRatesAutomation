@@ -7,3 +7,4 @@ downloads/
 superset_session/
 *.sql
 .env
+.current_sales_file.txt
