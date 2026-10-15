@@ -15,6 +15,8 @@ def get_monthly_fav_pool(month_str):
     """
     if month_str in ('2026-08', '2026-09'):
         target_file = 'Fav_DP_Count_2026-07-31.csv'
+    elif month_str == '2026-10':
+        target_file = 'Fav_DP_Count_2026-10-08.csv'
     else:
         fav_files = sorted([f for f in os.listdir(DOWNLOAD_FOLDER) if re.match(rf'^Fav_DP_Count_{month_str}-\d{{2}}\.csv$', f)])
         if not fav_files:

@@ -190,6 +190,29 @@ def prepare_sql(template, data_date):
     date_ref = f"CAST('{data_date}' AS DATE)"
     return template.replace("{{DATE_REF}}", date_ref)
 
+def set_query_limit(page, target_limit="100 000"):
+    """Sets the SQL Lab result limit dropdown to target_limit (e.g. 100 000) to prevent truncation to 1000."""
+    try:
+        limit_btn = page.locator('button:has(span.limitDropdown)').first
+        if limit_btn.is_visible(timeout=5000):
+            curr_text = limit_btn.inner_text()
+            if target_limit not in curr_text:
+                limit_btn.click()
+                page.wait_for_timeout(500)
+                opt = page.locator(f'.ant-dropdown-menu-item:has-text("{target_limit}")').first
+                if opt.is_visible(timeout=3000):
+                    opt.click()
+                    page.wait_for_timeout(500)
+                    print(f"🔧 Set Query LIMIT to {target_limit}")
+                else:
+                    opt10k = page.locator('.ant-dropdown-menu-item:has-text("10 000")').first
+                    if opt10k.is_visible(timeout=3000):
+                        opt10k.click()
+                        page.wait_for_timeout(500)
+                        print("🔧 Set Query LIMIT to 10 000")
+    except Exception as e:
+        print(f"⚠️ Could not set query limit: {e}")
+
 def run_query_and_download(page, sql_text, target_filename):
     """ACTUAL DEFINITION of UI Automation logic."""
     print(f"\n--- Processing: {target_filename} ---")
@@ -205,7 +228,10 @@ def run_query_and_download(page, sql_text, target_filename):
     page.wait_for_selector(".ace_editor")
     page.evaluate("(text) => { ace.edit(document.querySelector('.ace_editor')).setValue(text); }", sql_text)
 
-    # 3. Trigger Query
+    # 3. Ensure limit is set to 100 000 so results are not capped at 1 000
+    set_query_limit(page, "100 000")
+
+    # 4. Trigger Query
     page.locator('button:has-text("RUN")').first.click()
     print("🚀 Query triggered. Waiting for results...")
 
