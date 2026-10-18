@@ -8,7 +8,13 @@ from datetime import datetime
 
 # --- CONFIGURATION ---
 TREND_FILE = 'MTD_ConversionRate_Trend.xlsx'
-DASHBOARD_DIR = '/Users/akashverma/Documents/ConvAutomationAndReporting/vrm_mtd_conv_rates/vrm_mtd_conv_rates'
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_CANDIDATE_DIRS = [
+    os.path.join(os.path.dirname(_SCRIPT_DIR), 'vrm_mtd_conv_rates', 'vrm_mtd_conv_rates'),
+    os.path.join(os.path.dirname(_SCRIPT_DIR), 'vrm_mtd_conv_rates'),
+    '/Users/akashverma/Documents/ConvAutomationAndReporting/vrm_mtd_conv_rates/vrm_mtd_conv_rates'
+]
+DASHBOARD_DIR = next((d for d in _CANDIDATE_DIRS if os.path.exists(os.path.join(d, 'mtd_dashboard.html'))), _CANDIDATE_DIRS[0])
 HTML_FILE = os.path.join(DASHBOARD_DIR, 'mtd_dashboard.html')
 
 def clean_nans(obj):
